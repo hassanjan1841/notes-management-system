@@ -4,18 +4,21 @@ import NoteCard from "@/components/NoteCard";
 import CreateNoteModal from "@/components/CreateNoteModal";
 import toast from "react-hot-toast";
 import { PlusCircleIcon } from "@heroicons/react/24/solid";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DashboardPage: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { user } = useAuth();
   const fetchNotes = async () => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await getAllNotes();
-      setNotes(response);
+      const userNotes = response.filter((note) => note.userId === user?.id);
+      setNotes(userNotes);
     } catch (err) {
       console.error("Failed to fetch notes:", err);
       setError("Failed to load notes. Please try again later.");
@@ -31,8 +34,7 @@ const DashboardPage: React.FC = () => {
 
   const handleCreateSuccess = () => {
     setIsCreateModalOpen(false);
-    fetchNotes(); // Refresh the notes list
-    toast.success("Note created successfully!");
+    fetchNotes();
   };
 
   if (isLoading) {
