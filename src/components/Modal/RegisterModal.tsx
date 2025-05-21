@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { registerSchema, type RegisterFormData } from "@/utils/schemas";
-import { registerUser as apiRegisterUser } from "@/services/authService";
 import { AxiosError } from "axios";
-import Modal from "./Modal"; // Assuming Modal.tsx is in the same directory or adjust path
+import Modal from "./Modal";
+import { registerUser } from "@/services/authService";
 
 interface RegisterModalProps {
   isOpen: boolean;
@@ -19,7 +18,6 @@ const RegisterModal: React.FC<RegisterModalProps> = ({
   onClose,
   onSwitchToLogin,
 }) => {
-  const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -33,23 +31,22 @@ const RegisterModal: React.FC<RegisterModalProps> = ({
 
   useEffect(() => {
     if (isSubmitSuccessful) {
-      reset(); // Reset form on successful submission and modal close
+      reset();
       onClose();
     }
   }, [isSubmitSuccessful, reset, onClose]);
 
   useEffect(() => {
-    // Reset server error when modal is opened/closed or form is reset
     setServerError(null);
   }, [isOpen, reset]);
 
   const onSubmit = async (data: RegisterFormData) => {
     setServerError(null);
     try {
-      await apiRegisterUser(data);
+      await registerUser(data);
       toast.success("Registration successful! Please log in.");
-      onClose(); // Close register modal
-      onSwitchToLogin(); // Open login modal
+      onClose();
+      onSwitchToLogin();
     } catch (error) {
       console.error("Registration failed:", error);
       if (error instanceof AxiosError && error.response?.data?.message) {
@@ -175,8 +172,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({
         Already have an account?{" "}
         <button
           onClick={() => {
-            onClose(); // Close register modal first
-            onSwitchToLogin(); // Then open login modal
+            onClose();
+            onSwitchToLogin();
           }}
           className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"
         >

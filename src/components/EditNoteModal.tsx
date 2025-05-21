@@ -20,6 +20,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({
   note,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -33,20 +34,22 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({
       title: note?.title,
       description: note?.description,
       password: "",
+      confirmPassword: "",
     },
   });
 
-  // // Set form values when note changes
   useEffect(() => {
     if (note) {
       setValue("title", note.title);
       setValue("description", note.description);
+      setValue("password", "");
+      setValue("confirmPassword", "");
+      setShowConfirmPassword(false);
     }
-  }, [note, setValue]);
+  }, [note, setValue, reset]);
 
   const onSubmit = async (data: NoteFormData) => {
     if (!note?.id) return;
-
     setIsSubmitting(true);
     try {
       const payload = {
@@ -172,10 +175,25 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({
                 } text-gray-900 sm:text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5`}
                 placeholder={
                   note.isProtected
-                    ? "Keep existing password"
+                    ? "Leave blank to keep existing password"
                     : "Leave blank for no password"
                 }
                 disabled={isSubmitting}
+                onChange={(e) => {
+                  const pass = e.target.value;
+                  setValue("password", pass);
+                  if (note.isProtected && pass === "") {
+                    setShowConfirmPassword(false);
+                  } else if (pass !== "") {
+                    setShowConfirmPassword(true);
+                  }
+                  if (pass === "none" && note.isProtected) {
+                    setValue("confirmPassword", "none");
+                    setShowConfirmPassword(false);
+                  } else if (pass === "") {
+                    setShowConfirmPassword(false);
+                  }
+                }}
               />
               {note.isProtected && (
                 <p className="mt-1 text-xs text-gray-500">
@@ -190,6 +208,34 @@ const EditNoteModal: React.FC<EditNoteModalProps> = ({
                 </p>
               )}
             </div>
+
+            {showConfirmPassword && (
+              <div className="mb-6">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Confirm New Password <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  {...register("confirmPassword")}
+                  className={`shadow-sm bg-gray-50 border ${
+                    errors.confirmPassword
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } text-gray-900 sm:text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5`}
+                  placeholder="Confirm new password"
+                  disabled={isSubmitting}
+                />
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="flex items-center justify-end space-x-3">
               <button

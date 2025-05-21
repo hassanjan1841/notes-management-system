@@ -114,7 +114,6 @@ const DashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* Create Note Modal */}
       <CreateNoteModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

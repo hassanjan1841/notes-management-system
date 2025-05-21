@@ -23,7 +23,6 @@ const io = new Server(server, {
 
 app.set('socketio', io);
 
-// CORS Configuration
 const corsOptions = {
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
 };

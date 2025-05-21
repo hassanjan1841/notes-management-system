@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const CreateNotePage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth(); // To ensure user is authenticated
+  const { isAuthenticated } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -30,8 +30,6 @@ const CreateNotePage: React.FC = () => {
   const onSubmit = async (data: NoteFormData) => {
     setIsSubmitting(true);
     try {
-      // If password is empty string, it should be submitted as null or undefined
-      // The schema transform handles empty string to null, so API should receive null.
       const payload = {
         ...data,
         password: data.password === "" ? null : data.password,
@@ -39,7 +37,7 @@ const CreateNotePage: React.FC = () => {
       await createNote(payload as NoteFormData);
       toast.success("Note created successfully!");
       reset();
-      navigate("/dashboard"); // Redirect to dashboard after creation
+      navigate("/dashboard");
     } catch (err) {
       const axiosError = err as AxiosError<{
         message?: string;
@@ -62,7 +60,6 @@ const CreateNotePage: React.FC = () => {
     }
   };
 
-  // Redirect if not authenticated, though this should ideally be handled by a protected route component
   if (!isAuthenticated) {
     navigate("/login");
     return null;

@@ -10,7 +10,6 @@ import { Toaster } from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import LoginModal from "../Modal/LoginModal";
 import RegisterModal from "../Modal/RegisterModal";
-import HomePage from "@/pages/HomePage";
 
 export interface ModalControls {
   openLoginModal: () => void;
@@ -25,27 +24,23 @@ const Layout: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if we were redirected from a protected route with a request to open login modal
     if (location.state?.openLoginModal) {
       setIsLoginModalOpen(true);
-      // Clear the state to prevent modal from reopening on navigation
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);
 
   const openLoginModal = () => {
-    setIsRegisterModalOpen(false); // Ensure register modal is closed
+    setIsRegisterModalOpen(false);
     setIsLoginModalOpen(true);
   };
   const closeLoginModal = () => setIsLoginModalOpen(false);
 
   const openRegisterModal = () => {
-    setIsLoginModalOpen(false); // Ensure login modal is closed
+    setIsLoginModalOpen(false);
     setIsRegisterModalOpen(true);
   };
   const closeRegisterModal = () => setIsRegisterModalOpen(false);
-
-  const outlet = <Outlet />;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -65,7 +60,7 @@ const Layout: React.FC = () => {
                     : "text-gray-300 hover:bg-gray-700 hover:text-white"
                 }`
               }
-              end // Ensure exact match for Home link
+              end
             >
               Home (Public Notes)
             </NavLink>

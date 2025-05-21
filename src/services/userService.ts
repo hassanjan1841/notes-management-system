@@ -8,11 +8,10 @@ interface User {
   id: string;
   name: string;
   email: string;
-  // other fields if your backend returns them
 }
 
 interface ProfileResponse {
-  message?: string; // Optional success message
+  message?: string;
   user: User;
 }
 

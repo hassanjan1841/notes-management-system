@@ -5,22 +5,20 @@ import React, {
   useEffect,
   type ReactNode,
 } from "react";
-import apiClient from "../services/api"; // Import your configured apiClient
+import apiClient from "../services/api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   loginUser as apiLoginUser,
   logoutUser as apiLogoutUser,
   getToken,
-} from "../services/authService"; // Assuming logoutUser exists or will be created
+} from "../services/authService";
 import { disconnectSocket, useSocket } from "../services/socketService";
-import { io } from "socket.io-client";
 
 interface User {
   id: string;
   name: string;
   email: string;
-  // Add any other user properties you expect from the backend
 }
 
 interface AuthContextType {
@@ -28,9 +26,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   socketConnected: boolean;
-  login: (loginData: any) => Promise<void>; // Changed signature
-  logout: () => Promise<void>; // Changed to async
-  fetchCurrentUser: () => Promise<void>; // New function to get user on load
+  login: (loginData: any) => Promise<void>;
+  logout: () => Promise<void>;
+  fetchCurrentUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -47,11 +45,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();
 
   const { isConnected } = useSocket(user?.id);
-  console.log("isConnected", isConnected);
   const fetchCurrentUser = async () => {
     setIsLoading(true);
     try {
-      // This endpoint should be protected and return the user if cookie is valid
       const token = getToken();
       if (!token) {
         setUser(null);
@@ -92,27 +88,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       toast.success("Logged in successfully!");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed");
-      throw error; // Re-throw to allow component to handle
+      throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await apiLogoutUser(); // Call the backend logout to clear the cookie
+      await apiLogoutUser();
 
-      // Disconnect socket connection on logout
-      disconnectSocket(); // Explicitly disconnect socket
+      disconnectSocket();
 
       setUser(null);
       toast.success("Logged out successfully!");
-      navigate("/"); // Navigate to home page after logout
+      navigate("/");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Logout failed");
-      // Still attempt to clear client-side state
       setUser(null);
-      // Disconnect socket even if logout API fails
       disconnectSocket();
-      navigate("/"); // Ensure redirection to home page even if API call fails
+      navigate("/");
     }
   };
 
@@ -120,7 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user, // Based on user object presence
+        isAuthenticated: !!user,
         isLoading,
         socketConnected: isConnected,
         login,

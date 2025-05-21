@@ -34,7 +34,6 @@ const CreateNoteModal: React.FC<CreateNoteModalProps> = ({
     },
   });
 
-  // Focus the title input when modal opens
   useEffect(() => {
     if (isOpen && titleInputRef.current) {
       setTimeout(() => {
@@ -44,11 +43,8 @@ const CreateNoteModal: React.FC<CreateNoteModalProps> = ({
   }, [isOpen]);
 
   const onSubmit = async (data: NoteFormData) => {
-    console.log("data", data);
     setIsSubmitting(true);
     try {
-      // If password is empty string, it should be submitted as null or undefined
-      // The schema transform handles empty string to null, so API should receive null.
       const payload = {
         ...data,
         password: data.password === "" ? null : data.password,

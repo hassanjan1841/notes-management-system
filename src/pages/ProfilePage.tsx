@@ -17,19 +17,13 @@ import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 
 const ProfilePage: React.FC = () => {
-  const {
-    user,
-    // login: updateUserInContext, // Old way, context login has different signature/purpose now
-    fetchCurrentUser, // Use this to refresh user data in context
-    isLoading: authLoading,
-  } = useAuth();
+  const { user, fetchCurrentUser, isLoading: authLoading } = useAuth();
   const [isFetchingProfile, setIsFetchingProfile] = useState(true);
 
   const {
     register: registerProfile,
     handleSubmit: handleSubmitProfile,
     formState: { errors: profileErrors, isSubmitting: isSubmittingProfile },
-    reset: resetProfileForm,
     setValue: setProfileValue,
   } = useForm<UpdateProfileFormData>({
     resolver: zodResolver(updateProfileSchema),
@@ -50,21 +44,16 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     if (user && !authLoading) {
-      // If user is already in context and auth is not loading, try to prefill
       setProfileValue("name", user.name);
       setProfileValue("email", user.email);
       setIsFetchingProfile(false);
     } else if (!authLoading) {
-      // If no user in context and auth has loaded, fetch profile
       const fetchProfile = async () => {
         setIsFetchingProfile(true);
         try {
           const profileData = await getMyProfile();
           setProfileValue("name", profileData.name);
           setProfileValue("email", profileData.email);
-          // Note: updateUserInContext might not be strictly needed here
-          // if getMyProfile is just for initial load and context is already up-to-date or will be by login.
-          // However, if this is the primary source of user data on this page, ensure context reflects it.
         } catch (error) {
           toast.error("Could not fetch profile information.");
           console.error("Fetch profile error:", error);
@@ -74,10 +63,9 @@ const ProfilePage: React.FC = () => {
       };
       fetchProfile();
     }
-  }, [user, authLoading, setProfileValue, fetchCurrentUser]); // Added fetchCurrentUser to dependencies
+  }, [user, authLoading, setProfileValue, fetchCurrentUser]);
 
   const onProfileUpdateSubmit = async (data: UpdateProfileFormData) => {
-    // Filter out empty fields, so we only send what the user intends to update.
     const filteredData: Partial<UpdateProfileFormData> = {};
     if (data.name && data.name !== user?.name) filteredData.name = data.name;
     if (data.email && data.email !== user?.email)
@@ -91,7 +79,7 @@ const ProfilePage: React.FC = () => {
     try {
       const response = await updateMyProfile(filteredData);
       toast.success(response.message || "Profile updated successfully!");
-      await fetchCurrentUser(); // Refresh user from backend, which updates context
+      await fetchCurrentUser();
     } catch (err) {
       const axiosError = err as AxiosError<{
         message?: string;
@@ -270,7 +258,34 @@ const ProfilePage: React.FC = () => {
               }`}
               id="new-password"
               type="password"
-              placeholder="New Password"
+              placeholder="New Password (min. 6 characters)"
+              disabled={isSubmittingPassword}
+            />
+            {passwordErrors.newPassword && (
+              <p className="text-red-500 text-xs italic mt-1">
+                {passwordErrors.newPassword.message
+                  ? String(passwordErrors.newPassword.message)
+                  : "Invalid input"}
+              </p>
+            )}
+          </div>
+          <div className="mb-6">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="confirm-new-password"
+            >
+              Confirm New Password
+            </label>
+            <input
+              {...registerPassword("newPassword")}
+              className={`shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                passwordErrors.newPassword
+                  ? "border-red-500"
+                  : "border-gray-300"
+              }`}
+              id="confirm-new-password"
+              type="password"
+              placeholder="Confirm New Password"
               disabled={isSubmittingPassword}
             />
             {passwordErrors.newPassword && (
@@ -282,7 +297,7 @@ const ProfilePage: React.FC = () => {
             )}
           </div>
           <button
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out disabled:opacity-50"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out disabled:opacity-50"
             type="submit"
             disabled={isSubmittingPassword}
           >

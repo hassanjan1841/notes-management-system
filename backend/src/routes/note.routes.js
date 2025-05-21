@@ -13,18 +13,13 @@ import { body, param } from 'express-validator';
 
 const router = express.Router();
 
-// Public route: Get all notes
 router.get('/', getAllNotes);
 
-// Public route: Get a single note by ID (password might be required in body to unlock)
-// Using POST for /:id/view to allow sending password in body for protected notes safely.
-// GET requests with bodies are generally discouraged, though possible.
 router.post('/:id/view',
     [param('id', 'Note ID is required').isString().notEmpty().trim()],
     getNoteById
 );
 
-// --- All routes below are protected and require authentication ---
 router.use(protect);
 
 router.post('/create',
@@ -42,10 +37,9 @@ router.put('/:id/update',
         body('title').optional().isString().notEmpty().trim(),
         body('description').optional().isString().notEmpty().trim(),
         body('password').optional({ nullable: true }).custom((value) => {
-            if (value === null) return true; // explicitly removing password
-            if (typeof value === 'string' && value.length >= 4) return true; // setting/changing password
-            if (value === undefined) return true; // password field not provided, so no change to password
-            // If value is provided but not null and not a valid string password
+            if (value === null) return true;
+            if (typeof value === 'string' && value.length >= 4) return true;
+            if (value === undefined) return true;
             if (value !== null && value !== undefined) {
                 throw new Error('Password must be at least 4 characters, or null to remove');
             }

@@ -5,7 +5,6 @@ import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import NoteDetailPage from "./pages/NoteDetailPage";
 
 function App() {
   return (
@@ -28,7 +27,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="notes/:id" element={<NoteDetailPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

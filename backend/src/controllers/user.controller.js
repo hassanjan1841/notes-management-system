@@ -2,10 +2,8 @@ import prisma from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import { validationResult } from 'express-validator';
 
-// Get user profile
 export const getMyProfile = async (req, res) => {
     try {
-        // req.user is attached by the protect middleware
         const user = await prisma.user.findUnique({
             where: { id: req.user.id },
             select: { id: true, name: true, email: true, createdAt: true, updatedAt: true },
@@ -21,7 +19,6 @@ export const getMyProfile = async (req, res) => {
     }
 };
 
-// Update user profile (name, email)
 export const updateMyProfile = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -35,7 +32,6 @@ export const updateMyProfile = async (req, res) => {
         const updateData = {};
         if (name) updateData.name = name;
         if (email) {
-            // Check if email is already taken by another user
             const existingUser = await prisma.user.findFirst({
                 where: {
                     email: email,
@@ -65,7 +61,6 @@ export const updateMyProfile = async (req, res) => {
     }
 };
 
-// Change user password
 export const changeMyPassword = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -79,7 +74,7 @@ export const changeMyPassword = async (req, res) => {
         const user = await prisma.user.findUnique({ where: { id: userId } });
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' }); // Should not happen if protect middleware is used
+            return res.status(404).json({ message: 'User not found' });
         }
 
         const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);

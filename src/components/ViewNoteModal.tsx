@@ -55,7 +55,6 @@ const ViewNoteModal: React.FC<ViewNoteModalProps> = ({
   );
   const [isReverting, setIsReverting] = useState(false);
 
-  // Reset the state when the modal closes
   useEffect(() => {
     if (!isOpen) {
       setNote(null);
@@ -85,7 +84,7 @@ const ViewNoteModal: React.FC<ViewNoteModalProps> = ({
 
         if (
           fetchedNote.isProtected &&
-          fetchedNote.description.startsWith("Description is protected")
+          fetchedNote.description?.startsWith("Description is protected")
         ) {
           setIsPasswordProtected(true);
           setIsUnlocked(false);
@@ -192,7 +191,6 @@ const ViewNoteModal: React.FC<ViewNoteModalProps> = ({
       fetchNoteDetails();
     }
     setIsEditModalOpen(false);
-    toast.success("Note updated successfully!");
   };
 
   const isOwner = isAuthenticated && user && note && user.id === note.userId;
@@ -411,7 +409,6 @@ const ViewNoteModal: React.FC<ViewNoteModalProps> = ({
         )}
       </div>
 
-      {/* Delete Modal */}
       {noteId && note && (
         <>
           <DeleteNoteModal

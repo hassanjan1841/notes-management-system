@@ -45,7 +45,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) {
-      setServerError(null); // Clear server error when modal is closed
+      setServerError(null);
     }
   }, [isOpen, reset]);
 
@@ -53,12 +53,10 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setServerError(null);
     try {
       await login(data);
-      toast.success("Logged in successfully!");
     } catch (error) {
       console.error("Login failed:", error);
       if (error instanceof AxiosError && error.response?.data?.message) {
         setServerError(error.response.data.message);
-        // Toast for login error is handled globally in AuthContext or here if specific message needed
       } else if (error instanceof Error) {
         setServerError(error.message);
         toast.error(`Login failed: ${error.message}`);
@@ -138,9 +136,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
       <p className="mt-6 text-center text-sm text-gray-600">
         Don't have an account?{" "}
         <button
-          type="button" // Ensure it's not a submit button
+          type="button"
           onClick={() => {
-            // onClose(); // Let Layout handle closing this modal
             onSwitchToRegister();
           }}
           className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none"

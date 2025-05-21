@@ -1,7 +1,7 @@
 import prisma from '../config/db.js';
 import { validationResult } from 'express-validator';
 
-// Helper function to get the next version number for a note
+
 async function getNextVersion(noteId) {
     const lastVersion = await prisma.noteVersion.findFirst({
         where: { noteId },
@@ -10,7 +10,7 @@ async function getNextVersion(noteId) {
     return lastVersion ? lastVersion.version + 1 : 1;
 }
 
-// Create a new note
+
 export const createNote = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -19,20 +19,20 @@ export const createNote = async (req, res) => {
 
     try {
         const { title, description, password: notePassword } = req.body;
-        const userId = req.user.id; // Attached by protect middleware
+        const userId = req.user.id;
 
         const note = await prisma.note.create({
             data: {
                 title,
                 description,
-                password: notePassword, // This can be null
+                password: notePassword,
                 userId,
                 versions: {
                     create: [
                         {
                             title,
                             description,
-                            version: 1, // Initial version
+                            version: 1,
                         },
                     ],
                 },
@@ -53,7 +53,7 @@ export const createNote = async (req, res) => {
     }
 };
 
-// Get all notes (accessible to all users)
+
 export const getAllNotes = async (req, res) => {
     try {
         const notes = await prisma.note.findMany({
@@ -71,7 +71,6 @@ export const getAllNotes = async (req, res) => {
             }
         });
 
-        // For password-protected notes, only show title and a placeholder for description
         const notesWithConditionalDescription = notes.map(note => {
             if (note.password) {
                 return { ...note, description: 'This note is password protected. Provide password to view.' };
@@ -103,7 +102,6 @@ export const getNoteById = async (req, res) => {
             return res.status(404).json({ message: 'Note not found' });
         }
 
-        // If note is password protected and no password provided or incorrect password
         if (note.password) {
             if (!providedPassword) {
                 return res.status(200).json({
@@ -167,9 +165,9 @@ export const updateNote = async (req, res) => {
         const updatedNote = await prisma.note.update({
             where: { id },
             data: {
-                title: title || note.title, // Use new title or keep old if not provided
+                title: title || note.title,
                 description: description || note.description,
-                password: newNotePassword === undefined ? note.password : newNotePassword, // Allow setting, changing, or removing password
+                password: newNotePassword === undefined ? note.password : newNotePassword,
                 versions: {
                     create: {
                         title: title || note.title,
@@ -194,7 +192,8 @@ export const updateNote = async (req, res) => {
     }
 };
 
-// Delete a note (only by owner)
+
+
 export const deleteNote = async (req, res) => {
     try {
         const { id } = req.params;
@@ -210,14 +209,12 @@ export const deleteNote = async (req, res) => {
             return res.status(403).json({ message: 'User not authorized to delete this note' });
         }
 
-        // Prisma will cascade delete related NoteVersions due to the schema definition
-        const deletedNoteId = note.id; // Store id before deleting
+        const deletedNoteId = note.id;
         const deletedNoteOwnerId = note.userId;
 
         await prisma.note.delete({ where: { id } });
 
         const io = req.app.get('socketio');
-        // Send the ID of the deleted note and its owner for client-side filtering
         io.emit('note_deleted', { noteId: deletedNoteId, userId: deletedNoteOwnerId });
 
         res.status(200).json({ message: 'Note deleted successfully' });
@@ -227,24 +224,19 @@ export const deleteNote = async (req, res) => {
     }
 };
 
-// Get version history for a note
+
 export const getNoteVersionHistory = async (req, res) => {
     try {
         const { id } = req.params;
         const note = await prisma.note.findUnique({
             where: { id },
-            select: { password: true } // Just need to check if it's password protected
+            select: { password: true }
         });
 
         if (!note) {
             return res.status(404).json({ message: 'Note not found' });
         }
 
-        // Optional: If note is password protected, you might require password to view history
-        // const { password: providedPassword } = req.body;
-        // if (note.password && providedPassword !== note.password) {
-        //     return res.status(401).json({ message: 'Incorrect password for note. Cannot retrieve version history.' });
-        // }
 
         const versions = await prisma.noteVersion.findMany({
             where: { noteId: id },
@@ -258,7 +250,7 @@ export const getNoteVersionHistory = async (req, res) => {
     }
 };
 
-// Revert a note to a previous version
+
 export const revertNoteToVersion = async (req, res) => {
     try {
         const { noteId, versionId } = req.params;
@@ -276,8 +268,6 @@ export const revertNoteToVersion = async (req, res) => {
         if (!versionToRevertTo || versionToRevertTo.noteId !== noteId) {
             return res.status(404).json({ message: 'Version not found for this note' });
         }
-
-        // Create a new version based on the one we are reverting to
         const nextVersionNumber = await getNextVersion(noteId);
 
         const revertedNote = await prisma.note.update({
@@ -285,13 +275,12 @@ export const revertNoteToVersion = async (req, res) => {
             data: {
                 title: versionToRevertTo.title,
                 description: versionToRevertTo.description,
-                // Password of the note remains unchanged during revert for simplicity,
-                // unless explicitly managed as part of versioning.
+
                 versions: {
                     create: {
                         title: versionToRevertTo.title,
                         description: versionToRevertTo.description,
-                        version: nextVersionNumber, // This is a new version, created from an old state
+                        version: nextVersionNumber,
                     },
                 },
             },
@@ -302,7 +291,7 @@ export const revertNoteToVersion = async (req, res) => {
         });
 
         const io = req.app.get('socketio');
-        io.emit('note_updated', { note: revertedNote }); // A revert is also an update
+        io.emit('note_updated', { note: revertedNote });
 
         res.status(200).json({ message: 'Note reverted successfully', note: revertedNote });
     } catch (error) {

@@ -28,11 +28,11 @@ const Modal: React.FC<ModalProps> = ({
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center p-4 z-50 transition-opacity duration-300 ease-in-out"
-      onClick={onClose} // Close on backdrop click
+      onClick={onClose}
     >
       <div
         className={`bg-white rounded-lg shadow-xl p-6 space-y-4 w-full ${sizeClasses[size]} transform transition-all duration-300 ease-in-out scale-95 opacity-0 animate-modalShow`}
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal content
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-semibold text-gray-800">{title}</h3>

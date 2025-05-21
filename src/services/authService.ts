@@ -1,21 +1,19 @@
 import apiClient from "./api";
-import Cookies from "js-cookie"; // Import js-cookie
+import Cookies from "js-cookie";
 import type { LoginFormData, RegisterFormData } from "@/utils/schemas";
 import type { User } from "@/types";
-// import type { RegisterFormData, LoginFormData } from "../utils/schemas";
 
-// Define a type for the login response that includes the token
 interface LoginResponse {
   token: string;
   user: User;
 }
 
 interface RegisterResponse {
-  user: User; // Or just a success message
+  user: User;
   message: string;
 }
 
-const TOKEN_KEY = "jwt_token"; // Key for storing the token in cookies
+const TOKEN_KEY = "jwt_token";
 
 export const registerUser = async (
   userData: RegisterFormData
@@ -36,10 +34,9 @@ export const loginUser = async (
   );
   if (response.data.token) {
     Cookies.set(TOKEN_KEY, response.data.token, {
-      secure: import.meta.env.PROD, // Use secure cookies in production
-      sameSite: "Lax", // Mitigate CSRF
+      secure: import.meta.env.PROD,
+      sameSite: "Lax",
     });
-    console.log("loginUser", response.data);
   }
   return response.data;
 };

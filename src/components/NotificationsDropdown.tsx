@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { initializeSocket } from "@/services/socketService";
 import { Socket } from "socket.io-client";
 
-// Notification type definition
 interface Notification {
   id: string;
   message: string;
@@ -20,7 +19,6 @@ const NotificationsDropdown: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -36,7 +34,6 @@ const NotificationsDropdown: React.FC = () => {
     };
   }, []);
 
-  // Function to add a new notification
   const addNotification = (message: string, type: Notification["type"]) => {
     const newNotification: Notification = {
       id: Date.now().toString(),
@@ -49,24 +46,20 @@ const NotificationsDropdown: React.FC = () => {
     setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]); // Keep max 10 notifications
   };
 
-  // Initialize socket when user is authenticated
   useEffect(() => {
     if (!user) return;
 
     const socket = initializeSocket(user.id);
     setSocketInstance(socket);
 
-    // For demo - add a test notification after component mounts
     setTimeout(() => {
       addNotification("Welcome to the Notes App!", "user_updated");
     }, 1000);
   }, [user]);
 
-  // Set up socket listeners for notifications
   useEffect(() => {
     if (!socketInstance) return;
 
-    // Set up listeners for note events with correct backend event names
     socketInstance.on("note_created", (data) => {
       const { note } = data;
       addNotification(`New note created: ${note.title}`, "note_created");
@@ -77,8 +70,7 @@ const NotificationsDropdown: React.FC = () => {
       addNotification(`Note updated: ${note.title}`, "note_updated");
     });
 
-    socketInstance.on("note_deleted", (data) => {
-      const { noteId } = data;
+    socketInstance.on("note_deleted", () => {
       addNotification(`Note deleted`, "note_deleted");
     });
 
@@ -88,7 +80,6 @@ const NotificationsDropdown: React.FC = () => {
     });
 
     return () => {
-      // Clean up listeners when component unmounts
       socketInstance.off("note_created");
       socketInstance.off("note_updated");
       socketInstance.off("note_deleted");
@@ -162,7 +153,6 @@ const NotificationsDropdown: React.FC = () => {
                         !notification.read ? "bg-blue-50" : ""
                       }`}
                       onClick={() => {
-                        // Mark this notification as read
                         setNotifications((prev) =>
                           prev.map((n) =>
                             n.id === notification.id ? { ...n, read: true } : n

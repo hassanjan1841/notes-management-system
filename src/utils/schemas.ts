@@ -14,7 +14,7 @@ export const registerSchema = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
-    path: ["confirmPassword"], // Path to field to display the error
+    path: ["confirmPassword"],
   });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
@@ -36,7 +36,7 @@ export const updateProfileSchema = z
   })
   .refine((data) => !!data.name || !!data.email, {
     message: "At least one field (name or email) must be provided to update.",
-    path: ["name"], // General error, can be shown at form level or attached to a field
+    path: ["name"],
   });
 
 export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;
@@ -62,19 +62,24 @@ export const noteSchema = z
         z
           .string()
           .length(0)
-          .transform(() => null), // Treat empty string as intending no password (becomes null)
+          .transform(() => null),
+        z.literal("none").transform(() => "none"),
         z.null(),
         z.string().min(4, {
           message: "Password must be at least 4 characters if provided",
         }),
       ])
       .optional(),
-    confirmPassword: z.string().optional(), // For setting/changing note password
+    confirmPassword: z.string().optional(),
   })
   .refine(
     (data) => {
-      // If password is provided, confirmPassword must match
-      if (data.password && data.password !== data.confirmPassword) {
+      if (
+        data.password &&
+        data.password !== "" &&
+        data.password !== "none" &&
+        data.password !== data.confirmPassword
+      ) {
         return false;
       }
       return true;
@@ -86,9 +91,12 @@ export const noteSchema = z
   )
   .refine(
     (data) => {
-      // If password is provided, it must be at least 4 chars.
-      // If not provided, it's fine (public note or not changing password).
-      if (data.password && data.password.length < 4) {
+      if (
+        data.password &&
+        data.password !== "none" &&
+        data.password.length > 0 &&
+        data.password.length < 4
+      ) {
         return false;
       }
       return true;

@@ -24,7 +24,6 @@ const DeleteNoteModal: React.FC<DeleteNoteModalProps> = ({
     setIsDeleting(true);
     try {
       await deleteNote(noteId);
-      toast.success("Note deleted successfully!");
       onSuccess();
     } catch (error) {
       console.error("Error deleting note:", error);

@@ -2,7 +2,6 @@ import prisma from '../src/config/db.js'; // Adjusted path for seed script
 import bcrypt from 'bcryptjs';
 
 async function main() {
-    console.log('Start seeding ...');
 
     // Create 5 Dummy Users
     const usersData = [];
@@ -18,7 +17,6 @@ async function main() {
     for (const uData of usersData) {
         const user = await prisma.user.create({ data: uData });
         users.push(user);
-        console.log(`Created user with id: ${user.id}`);
     }
 
     // Create 20-30 Dummy Notes, assigned to different users
@@ -39,7 +37,6 @@ async function main() {
 
     for (const nData of notesData) {
         const note = await prisma.note.create({ data: nData });
-        console.log(`Created note with id: ${note.id} for user ${note.userId}`);
     }
 
     console.log('Seeding finished.');
