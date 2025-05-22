@@ -24,6 +24,22 @@ const Layout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Check authentication status and redirect accordingly
+  useEffect(() => {
+    // Only redirect on the root path
+    if (location.pathname === '/') {
+      if (user) {
+        // If user is logged in, redirect to dashboard
+        navigate('/dashboard', { replace: true });
+      }
+    } else if (location.pathname === '/dashboard' || location.pathname === '/profile') {
+      // If trying to access protected routes without being logged in
+      if (!user) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [user, location.pathname, navigate]);
+
   useEffect(() => {
     if (location.state?.openLoginModal) {
       setIsLoginModalOpen(true);
@@ -60,7 +76,7 @@ const Layout: React.FC = () => {
       <header className="bg-gray-800 text-white shadow-md sticky top-0 z-40">
         <nav className="container mx-auto px-6 py-3">
           <div className="flex justify-between items-center">
-            <Link to="/" className="text-xl font-semibold hover:text-gray-300">
+            <Link to={user ? "/dashboard" : "/"} className="text-xl font-semibold hover:text-gray-300">
               NotesApp
             </Link>
             
@@ -99,27 +115,31 @@ const Layout: React.FC = () => {
             
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
-              <NavLink
-                to="/"
-                className={({ isActive }) =>
-                  `px-3 py-2 rounded-md text-sm font-medium ${
-                    isActive && location.pathname === "/"
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                  }`
-                }
-                end
-              >
-                Home (Public Notes)
-              </NavLink>
               {user ? (
                 <>
-                  <Link
+                  <NavLink
                     to="/dashboard"
-                    className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                    className={({ isActive }) =>
+                      `px-3 py-2 rounded-md text-sm font-medium ${
+                        isActive ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`
+                    }
                   >
                     Dashboard
-                  </Link>
+                  </NavLink>
+                  <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                      `px-3 py-2 rounded-md text-sm font-medium ${
+                        isActive && location.pathname === "/"
+                          ? "bg-gray-900 text-white"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`
+                    }
+                    end
+                  >
+                    Public Notes
+                  </NavLink>
                   <Link
                     to="/profile"
                     className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -135,6 +155,19 @@ const Layout: React.FC = () => {
                 </>
               ) : (
                 <>
+                  <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                      `px-3 py-2 rounded-md text-sm font-medium ${
+                        isActive && location.pathname === "/"
+                          ? "bg-gray-900 text-white"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`
+                    }
+                    end
+                  >
+                    Home (Public Notes)
+                  </NavLink>
                   <button
                     onClick={openLoginModal}
                     className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white focus:outline-none"
@@ -156,27 +189,31 @@ const Layout: React.FC = () => {
           {isMobileMenuOpen && (
             <div className="md:hidden mt-3 py-2 border-t border-gray-700">
               <div className="flex flex-col space-y-2">
-                <NavLink
-                  to="/"
-                  className={({ isActive }) =>
-                    `block px-3 py-2 rounded-md text-base font-medium ${
-                      isActive && location.pathname === "/"
-                        ? "bg-gray-900 text-white"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`
-                  }
-                  end
-                >
-                  Home (Public Notes)
-                </NavLink>
                 {user ? (
                   <>
-                    <Link
+                    <NavLink
                       to="/dashboard"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                      className={({ isActive }) =>
+                        `block px-3 py-2 rounded-md text-base font-medium ${
+                          isActive ? "bg-gray-900 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        }`
+                      }
                     >
                       Dashboard
-                    </Link>
+                    </NavLink>
+                    <NavLink
+                      to="/"
+                      className={({ isActive }) =>
+                        `block px-3 py-2 rounded-md text-base font-medium ${
+                          isActive && location.pathname === "/"
+                            ? "bg-gray-900 text-white"
+                            : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        }`
+                      }
+                      end
+                    >
+                      Public Notes
+                    </NavLink>
                     <Link
                       to="/profile"
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -192,6 +229,19 @@ const Layout: React.FC = () => {
                   </>
                 ) : (
                   <>
+                    <NavLink
+                      to="/"
+                      className={({ isActive }) =>
+                        `block px-3 py-2 rounded-md text-base font-medium ${
+                          isActive && location.pathname === "/"
+                            ? "bg-gray-900 text-white"
+                            : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        }`
+                      }
+                      end
+                    >
+                      Home (Public Notes)
+                    </NavLink>
                     <button
                       onClick={openLoginModal}
                       className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white focus:outline-none"
