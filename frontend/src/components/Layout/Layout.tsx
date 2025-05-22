@@ -24,16 +24,13 @@ const Layout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Check authentication status and redirect accordingly
+  
   useEffect(() => {
-    // Only redirect on the root path
     if (location.pathname === '/') {
       if (user) {
-        // If user is logged in, redirect to dashboard
         navigate('/dashboard', { replace: true });
       }
     } else if (location.pathname === '/dashboard' || location.pathname === '/profile') {
-      // If trying to access protected routes without being logged in
       if (!user) {
         navigate('/', { replace: true });
       }
@@ -47,7 +44,7 @@ const Layout: React.FC = () => {
     }
   }, [location, navigate]);
 
-  // Close mobile menu when changing routes
+
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
